@@ -1,0 +1,380 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package persistance;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.ejb.Stateless;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import problemDomain.Account;
+import problemDomain.AccountType;
+
+/**
+ * AccountService.java
+ * 
+ * Capstone Project
+ * Doctor Link by NART
+ * NART: Nitin Gupta, Abraham Chavez, Robin Yang, Tanner Leduc
+ * 
+ * @author Robin Yang
+ * @version 1.0
+ *
+ * Class Description: Service class for account objects. Responsible for 
+ * creating, deleting, and updating accounts. 
+ */
+
+@Stateless
+
+public class AccountService extends NARTService
+{
+    private Account account;
+    private InitialContext ic;
+    private DataSource ds;
+    private Connection conn;
+    private String sql;
+    private CallableStatement cs;
+    private ResultSet rs; 
+    /**
+     * Method deactivates account and updates database accordingly.
+     * Precondition:  Account exists as active in database.
+     * Postcondition:  Account is updated as deactivated in database.
+     * @param healthCare The health care number of account.
+     */
+    public void deActivateAccount(String healthCare)
+    {
+        //TODOsdfsdfdsfsdfsdfds
+    }
+   
+    /**
+     * Method used to login to Doctor Link application.  Account and time of 
+     * login is saved to database upon successful authentication.
+     * Precondition:  Account exist as active in database.
+     * Postcondition:  Account credentials are authenticated (i.e. username and
+     * password) and an Account object is created for a Doctor Link session.
+     * @param healthCare The health care number of account.
+     * @param userName The user name of the account.
+     * @param password The password of the account.
+     * @return An account for a Doctor Link session.
+     */
+    public boolean login(String userName, String password)
+    {
+        try {
+            
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            ic = new InitialContext();
+            ds = (DataSource) ic.lookup("jdbc/DrLinkPool");
+            conn=ds.getConnection();
+            if (conn == null)
+                return false;
+            
+            sql = "{call login('"+userName+"','"+password+"')}";
+            cs = conn.prepareCall(sql);
+            rs = cs.executeQuery();
+            
+            while(rs.next())
+            {
+                if(!rs.getBoolean(1))
+                    return false;
+            }
+            cs.close();
+            conn.close();
+        } catch (InstantiationException ex) {
+            return false;
+        } catch (IllegalAccessException ex) {
+            return false;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        } catch (NamingException ex) {
+            return false;
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Method used to logout of Doctor Link application.  Account and time of 
+     * logout is saved to database.
+     * Precondition:  Account object is active in Doctor Link session.
+     * Postcondition:  Account object is destroyed and Doctor Link session is 
+     * no longer valid.
+     * @param account The account being logged out.
+     */
+    public void logout(Account account)
+    {
+    
+    }
+
+    /**
+     * Method used to validate account.
+     * Precondition:  Account is exists in database.
+     * Postcondition:  Account is set to valid in database.
+     * @param healthCare The health care number of account.
+     */
+    public void validateAccount(String healthCare)
+    {
+        
+    }
+    
+    /**
+     * Method used to check that account is paid for Messaging and FAQ services.
+     * Precondition:  Account exists in database.
+     * Postcondition:  Boolean is returned with the Paid status of account.  
+     * True equals Paid account.  False equals not Paid account.
+     * @param healthCare The health care number of account.
+     * @return 
+     */
+    public boolean checkIsPaid(String healthCare)
+    {
+        return false;
+    }
+    
+    public boolean isAccountExist(String userName, String healthCare)
+    {
+        try {
+            
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            ic = new InitialContext();
+            ds = (DataSource) ic.lookup("jdbc/DrLinkPool");
+            conn=ds.getConnection();
+            if (conn == null)
+                return false;
+            
+            sql = "{call isAccountExist('"+userName+"','"+healthCare+"')}";
+            cs = conn.prepareCall(sql);
+            rs = cs.executeQuery();
+            
+            while(rs.next())
+            {
+                if(!rs.getBoolean(1))
+                    return false;
+            }
+            cs.close();
+            conn.close();
+        } catch (InstantiationException ex) {
+            return false;
+        } catch (IllegalAccessException ex) {
+            return false;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        } catch (NamingException ex) {
+            return false;
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+    
+    @Override
+    public boolean create(Object type)
+    {
+        account = (Account) type;
+        try {
+            
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            ic = new InitialContext();
+            ds = (DataSource) ic.lookup("jdbc/DrLinkPool");
+            conn=ds.getConnection();
+            if (conn == null)
+                return false;
+            
+            sql = "{call createAccount('"+account.getHealthCare()+"','"+account.getUserName()+"', '"+account.getFirstName()+"',"
+                        + "'"+account.getLastName()+"', '"+account.getEmail()+"', '"+account.getPassword()+"', '"+account.getNumber()+"'"
+                        + ", '"+account.getSecondNumber()+"', "+account.isActive()+", '"+account.getAddress()+"', '"+account.getProvince()+"'"
+                        + ", '"+account.getCountry()+"', '"+account.getPostalCode()+"', '"+account.getCity()+"', '"+account.getAccountType()+"'"
+                        + ", "+account.isPaid()+")}";
+            cs = conn.prepareCall(sql);
+            cs.executeUpdate();
+            
+            cs.close();
+            conn.close();
+        } catch (InstantiationException ex) {
+            return false;
+        } catch (IllegalAccessException ex) {
+            return false;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        } catch (NamingException ex) {
+            return false;
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public Object read(Object type)
+    {
+        account = (Account) type;
+        try {
+            
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            ic = new InitialContext();
+            ds = (DataSource) ic.lookup("jdbc/DrLinkPool");
+            conn=ds.getConnection();
+            if (conn == null)
+                return false;
+            
+            sql = "{call readAccount('"+account.getUserName()+"')}";
+            cs = conn.prepareCall(sql);
+            rs = cs.executeQuery();
+            
+            while(rs.next())
+            {
+                account.setHealthCare(rs.getString(1));
+                account.setUserName(rs.getString(2));
+                account.setFirstName(rs.getString(3));
+                account.setLastName(rs.getString(4));
+                account.setEmail(rs.getString(5));
+                account.setNumber(rs.getString(6));
+                account.setSecondNumber(rs.getString(7));
+                account.setAddress(rs.getString(8));
+                account.setCountry(rs.getString(9));
+                account.setPostalCode(rs.getString(10));
+                account.setCity(rs.getString(11));
+                if(rs.getString("accountType").equalsIgnoreCase("PATIENT"))
+                    account.setAccountType(AccountType.PATIENT);
+                else if(rs.getString("accountType").equalsIgnoreCase("STAFF"))
+                    account.setAccountType(AccountType.STAFF);
+                else if(rs.getString("accountType").equalsIgnoreCase("DOCTOR"))
+                    account.setAccountType(AccountType.DOCTOR);
+                else if(rs.getString("accountType").equalsIgnoreCase("ADMIN"))
+                    account.setAccountType(AccountType.ADMIN);
+                account.setPaid(rs.getBoolean(13));
+                account.setRemark(rs.getString(14));
+                
+            }
+            cs.close();
+            conn.close();
+        } catch (InstantiationException ex) {
+            return false;
+        } catch (IllegalAccessException ex) {
+            return false;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        } catch (NamingException ex) {
+            return false;
+        } catch (SQLException ex) {
+            return false;
+        }
+        return account;
+    }
+
+    @Override
+    public void update(Class type)
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void delete(Class type)
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void DeleteMultiple(ArrayList<Class> type)
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public String getAllUsers()
+    {
+        String resultTable = "<table class=\"table table-striped table-hover display\" id=\"datatable5\" cellspacing=\"0\" width=\"100%\">"
+                            + " <thead>\n" +
+                            "<tr>\n" +
+                            "<th>First Name</th>\n" +
+                            "<th>Last Name</th>\n" +
+                            "<th>Email</th>\n" +
+                            "<th colspan=\"2\">Health Care</th>\n" +
+                            "</tr>\n" +
+                            "</thead>"
+                            + "<tbody>";
+        try {
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            ic = new InitialContext();
+            ds = (DataSource) ic.lookup("jdbc/DrLinkPool");
+            conn=ds.getConnection();
+            if (conn == null)
+                return "";
+            
+            sql = "{call getAllUsers()}";
+            cs = conn.prepareCall(sql);
+            rs = cs.executeQuery();
+            
+            while(rs.next())
+            {
+                resultTable += "<tr><td>"+rs.getString(1)+"</td>\n" +
+                                "<td>"+rs.getString(2)+"</td>\n" +
+                                "<td>"+rs.getString(3)+"</td>\n" +
+                                "<td>"+rs.getString(4)+"</td>"
+                                + "<td>\n" +
+                                "<div id=\"modal-content\">\n" +
+                                "<a class=\"holder-active\" href=\"#modal-form\"></a>\n" +
+                                "<!-- effect button -->\n" +
+                                "<div id=\"animation-switcher\" class=\"\">\n" +
+                                "<a href='AccountController?healthCareToUpdate="+rs.getString(5)+"' role='button' class=\"btn btn-primary\" data-effect=\"mfp-flipInY\">Edit Account</a>\n" +
+                                "</div>\n" +
+                                "</div>\n" +
+                                "</td></tr>";
+            }
+            cs.close();
+            conn.close();
+        } catch (InstantiationException ex) {
+            return resultTable += "</tbody></table>";
+        } catch (IllegalAccessException ex) {
+            return resultTable += "</tbody></table>";
+        } catch (ClassNotFoundException ex) {
+            return resultTable += "</tbody></table>";
+        } catch (NamingException ex) {
+            return resultTable += "</tbody></table>";
+        } catch (SQLException ex) {
+            return resultTable += "</tbody></table>";
+        }
+        return resultTable += "</tbody></table>";
+    }
+    public boolean update(Account account, String adminHealthCare)
+    {
+        try {
+            
+            Class.forName("com.mysql.jdbc.Driver").newInstance();
+            ic = new InitialContext();
+            ds = (DataSource) ic.lookup("jdbc/DrLinkPool");
+            conn=ds.getConnection();
+            if (conn == null)
+                return false;
+            
+            sql = "{call updateAccount('"+adminHealthCare+"','"+account.getHealthCare()+"','"+account.getUserName()+"', '"+account.getFirstName()+"',"
+                        + "'"+account.getLastName()+"', '"+account.getEmail()+"', '"+account.getNumber()+"'"
+                        + ", '"+account.getSecondNumber()+"', "+account.isActive()+", '"+account.getAddress()+"', '"+account.getProvince()+"'"
+                        + ", '"+account.getCountry()+"', '"+account.getPostalCode()+"', '"+account.getCity()+"', '"+account.getAccountType()+"')}";
+            cs = conn.prepareCall(sql);
+            cs.executeUpdate();
+            
+            cs.close();
+            conn.close();
+        } catch (InstantiationException ex) {
+            return false;
+        } catch (IllegalAccessException ex) {
+            return false;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        } catch (NamingException ex) {
+            return false;
+        } catch (SQLException ex) {
+            return false;
+        }
+        return true;
+    }
+    
+}
